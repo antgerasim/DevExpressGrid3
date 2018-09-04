@@ -1,0 +1,1 @@
+<%@ Application Codebehind="Global.asax.cs" Inherits="DevExpressGrid3.MvcApplication" Language="C#" %>

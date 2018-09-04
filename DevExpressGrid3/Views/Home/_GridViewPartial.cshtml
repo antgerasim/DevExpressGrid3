@@ -1,0 +1,94 @@
+@{
+    var grid = Html.DevExpress().GridView(settings =>
+    {
+        settings.Name = "GridView";
+        settings.CallbackRouteValues = new { Controller = "Home", Action = "GridViewPartial" };
+
+        settings.SettingsEditing.AddNewRowRouteValues = new { Controller = "Home", Action = "GridViewPartialAddNew" };
+        settings.SettingsEditing.UpdateRowRouteValues = new { Controller = "Home", Action = "GridViewPartialUpdate" };
+        settings.SettingsEditing.DeleteRowRouteValues = new { Controller = "Home", Action = "GridViewPartialDelete" };
+        settings.SettingsEditing.Mode = GridViewEditingMode.EditFormAndDisplayRow;
+        settings.SettingsBehavior.ConfirmDelete = true;
+
+        settings.CommandColumn.Visible = true;
+        settings.CommandColumn.ShowNewButton = true;
+        settings.CommandColumn.ShowDeleteButton = true;
+        settings.CommandColumn.ShowEditButton = true;
+
+        settings.KeyFieldName = "new_contract_plan_productId";
+
+        settings.SettingsPager.Visible = true;
+        settings.Settings.ShowGroupPanel = true;
+        settings.Settings.ShowFilterRow = true;
+        settings.SettingsBehavior.AllowSelectByRowClick = true;
+
+        settings.SettingsAdaptivity.AdaptivityMode = GridViewAdaptivityMode.Off;
+        settings.SettingsAdaptivity.AdaptiveColumnPosition = GridViewAdaptiveColumnPosition.Right;
+        settings.SettingsAdaptivity.AdaptiveDetailColumnCount = 1;
+        settings.SettingsAdaptivity.AllowOnlyOneAdaptiveDetailExpanded = false;
+        settings.SettingsAdaptivity.HideDataCellsAtWindowInnerWidth = 0;
+
+        settings.Columns.Add("ContrGUID");
+        settings.Columns.Add("ProductGroupProduct");
+        settings.Columns.Add("Product");
+        settings.Columns.Add("Service1Quarter");
+        settings.Columns.Add("Consult1Quarter");
+        settings.Columns.Add("Service2Quarter");
+        settings.Columns.Add("Consult2Quarter");
+        settings.Columns.Add("Service3Quarter");
+        settings.Columns.Add("Consult3Quarter");
+        settings.Columns.Add("Service4Quarter");
+        settings.Columns.Add("Consult4Quarter");
+        settings.Columns.Add("NewServiceYear");
+        settings.Columns.Add("NewConsultYear");
+        settings.Columns.Add("NewProductTotalConsult");
+        settings.Columns.Add("NewProductTotalService");
+        settings.Columns.Add("NewYearTotal");
+
+
+        #region
+        //settings.Columns.Add("new_contract_plan_productId");
+        //settings.Columns.Add("CreatedOn");
+        //settings.Columns.Add("CreatedBy");
+        //settings.Columns.Add("ModifiedOn");
+        //settings.Columns.Add("ModifiedBy");
+        //settings.Columns.Add("CreatedOnBehalfBy");
+        //settings.Columns.Add("ModifiedOnBehalfBy");
+        //settings.Columns.Add("OwnerId");
+        //settings.Columns.Add("OwnerIdType");
+        //settings.Columns.Add("OwningBusinessUnit");
+        //settings.Columns.Add("statecode");
+        //settings.Columns.Add("statuscode");
+        //settings.Columns.Add("VersionNumber");
+        //settings.Columns.Add("ImportSequenceNumber");
+        //settings.Columns.Add("OverriddenCreatedOn");
+        //settings.Columns.Add("TimeZoneRuleVersionNumber");
+        //settings.Columns.Add("UTCConversionTimeZoneCode");
+        //settings.Columns.Add("new_name");
+        //settings.Columns.Add("new_link_product_id");
+        //settings.Columns.Add("new_link_contract_plan_year_id");
+        //settings.Columns.Add("new_consulting");
+        //settings.Columns.Add("new_service_1_quarter");
+        //settings.Columns.Add("new_service_2_quarter");
+        //settings.Columns.Add("new_service_3_quarter");
+        //settings.Columns.Add("new_service_4_quarter");
+        //settings.Columns.Add("new_service_year");
+        //settings.Columns.Add("new_consulting_1_quarter");
+        //settings.Columns.Add("new_consulting_2_quarter");
+        //settings.Columns.Add("new_consulting_3_quarter");
+        //settings.Columns.Add("new_consulting_4_quarter");
+        //settings.Columns.Add("new_consulting_year");
+        //settings.Columns.Add("new_link_product_group_id");
+        //settings.Columns.Add("new_year_sum");
+        //settings.Columns.Add("new_product_sum_service");
+        //settings.Columns.Add("new_product_sum_consulting");
+        //settings.Columns.Add("new_d_product_catalogBase");
+        //settings.Columns.Add("new_d_product_groupsBase");
+        #endregion
+    });
+    if (ViewData["EditError"] != null)
+    {
+        grid.SetEditErrorText((string)ViewData["EditError"]);
+    }
+}
+@grid.Bind(Model).GetHtml() @*datasource here*@
