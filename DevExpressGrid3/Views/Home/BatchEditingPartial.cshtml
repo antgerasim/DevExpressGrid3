@@ -1,0 +1,97 @@
+﻿@model IEnumerable<EditableContract>
+@using DevExpressGrid3.Helpers
+
+@functions {
+    BatchEditingDemoOptions BatchEditingOptions { get { return ViewBag.BatchEditingOptions; } }
+}
+
+
+
+@{
+    Html.EnableClientValidation();
+    Html.EnableUnobtrusiveJavaScript();
+}
+
+
+@Html.DevExpress().GridView(settings => {
+    settings.Name = "GridView";
+    settings.KeyFieldName = "ContrGUID";
+    settings.Width = Unit.Percentage(100);
+    settings.CallbackRouteValues = new { Controller = "Home", Action = "BatchEditingPartial" };
+    // Specify the route value to the action method that will handle grid callbacks for batch data modification.
+    settings.SettingsEditing.BatchUpdateRouteValues = new { Controller = "Home", Action = "BatchEditingUpdateModel" };
+
+    settings.SettingsEditing.Mode = GridViewEditingMode.Batch;
+    //settings.SettingsEditing.BatchEditSettings.EditMode = BatchEditingOptions.EditMode;
+    settings.SettingsEditing.BatchEditSettings.EditMode = GridViewBatchEditMode.Cell;
+    //settings.SettingsEditing.BatchEditSettings.StartEditAction = BatchEditingOptions.StartEditAction;
+    settings.SettingsEditing.BatchEditSettings.StartEditAction = GridViewBatchStartEditAction.FocusedCellClick;
+    //settings.SettingsEditing.BatchEditSettings.HighlightDeletedRows = BatchEditingOptions.HighlightDeletedRows;
+    settings.SettingsEditing.BatchEditSettings.HighlightDeletedRows = true;
+
+    settings.CommandColumn.Visible = true;
+    settings.CommandColumn.ShowDeleteButton = true;
+    settings.CommandColumn.ShowNewButtonInHeader = true;
+    settings.CommandColumn.Width = Unit.Point(50);
+
+    settings.Columns.Add("ContrGUID");
+    settings.Columns.Add("ProductGroupProduct");
+    settings.Columns.Add("Product");
+    settings.Columns.Add("Service1Quarter");
+    settings.Columns.Add("Consult1Quarter");
+    settings.Columns.Add("Service2Quarter");
+    settings.Columns.Add("Consult2Quarter");
+    settings.Columns.Add("Service3Quarter");
+    settings.Columns.Add("Consult3Quarter");
+    settings.Columns.Add("Service4Quarter");
+    settings.Columns.Add("Consult4Quarter");
+    settings.Columns.Add("NewServiceYear");
+    settings.Columns.Add("NewConsultYear");
+    settings.Columns.Add("NewProductTotalConsult");
+    settings.Columns.Add("NewProductTotalService");
+    settings.Columns.Add("NewYearTotal");
+    /*
+        settings.Columns.Add("ContrGUID");
+        settings.Columns.Add(c => {
+            c.FieldName = "CategoryID";
+            c.Caption = "Category"; // caption sets text displayed column header
+            c.EditorProperties().ComboBox(p => {
+                p.TextField = "CategoryName";
+                p.ValueField = "CategoryID";
+                p.ValueType = typeof(int);
+                p.DataSource = RtCrmDataProvider.GetProducts();
+            });
+        });
+        settings.Columns.Add("QuantityPerUnit");
+        settings.Columns.Add(c => {
+            c.FieldName = "UnitPrice";
+            c.EditorProperties().SpinEdit(p => {
+                p.DisplayFormatString = "c";
+                p.DisplayFormatInEditMode = true;
+                p.MinValue = 0;
+                p.MaxValue = 1000000;
+            });
+        });
+        settings.Columns.Add(c => {
+            c.FieldName = "UnitsInStock";
+            c.EditorProperties().SpinEdit(p => {
+                p.NumberType = SpinEditNumberType.Integer;
+                p.MinValue = 0;
+                p.MaxValue = 10000;
+            });
+        });
+        settings.Columns.Add("Discontinued", MVCxGridViewColumnType.CheckBox);
+        */
+
+
+    //settings.CellEditorInitialize = (s, e) => {
+    //    ASPxEdit editor = (ASPxEdit)e.Editor;
+    //    editor.ValidationSettings.Display = Display.None;
+    //};
+    //settings.ClientSideEvents.BeginCallback = "OnBeginGridCallback";
+
+    GridViewFeaturesHelper.SetupGlobalGridViewBehavior(settings);
+}).Bind(Model).GetHtml()
+
+
+@*https://documentation.devexpress.com/AspNet/16147/ASP-NET-MVC-Extensions/Grid-View/Concepts/Data-Editing-and-Validation/Batch-Editing#batch-edit*@

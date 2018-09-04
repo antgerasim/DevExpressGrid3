@@ -2,7 +2,10 @@
     var grid = Html.DevExpress().GridView(settings =>
     {
         settings.Name = "GridView";
+        settings.KeyFieldName = "ContrGUID";
+        settings.Width = Unit.Percentage(100);
         settings.CallbackRouteValues = new { Controller = "Home", Action = "GridViewPartial" };
+        settings.SettingsEditing.BatchUpdateRouteValues = new { Controller = "Home", Action = "BatchUpdatePartial" };
 
         settings.SettingsEditing.AddNewRowRouteValues = new { Controller = "Home", Action = "GridViewPartialAddNew" };
         settings.SettingsEditing.UpdateRowRouteValues = new { Controller = "Home", Action = "GridViewPartialUpdate" };

@@ -2,8 +2,26 @@
     ViewBag.Title = "Home Page";
 }
 
+@*<script type="text/javascript">
+    MVCxClientGlobalEvents.AddControlsInitializedEventHandler(AttachEditorValueChangedEvent);
+
+    function AttachEditorValueChangedEvent() {
+        var demoOptionNames = ["EditMode", "StartEditAction", "HighlightDeletedRows"];
+        $.each(demoOptionNames, function (i, name) {
+            var editor = ASPxClientControl.GetControlCollection().GetByName(name);
+            editor.ValueChanged.AddHandler(OnChangeDemoOptions);
+        });
+    }
+    function OnChangeDemoOptions() {
+        gridView.PerformCallback();
+    }
+    function OnBeginGridCallback(s, e) {
+        e.customArgs = MVCxClientUtils.GetSerializedEditorValuesInContainer("options");
+    }
+</script>*@
+
 <h1>DOR's Rostelekom Datagrid</h1>
 <p>look only for DevExpress().GridView() not Html.DevExtreme().DataGrid()!</p>
-@Html.Action("GridViewPartial")
+@Html.Action("BatchEditingPartial")
 
 
