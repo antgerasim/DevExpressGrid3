@@ -2,6 +2,7 @@
 @using DevExpressGrid3.Models
 @*@model IEnumerable<new_contract_plan_productBase>*@
 @model IEnumerable<EditableContract>
+            @*todo - Add status !=черновик*@
 
 @functions {
     BatchEditingDemoOptions BatchEditingOptions { get { return ViewBag.BatchEditingOptions; } }
@@ -14,7 +15,7 @@
 
 @Html.DevExpress().GridView(settings => {
     settings.Name = "GridView";
-    settings.KeyFieldName = "ContrGUID";
+    settings.KeyFieldName = "ContrGuid";
     //settings.KeyFieldName = "new_contract_plan_productId";
     settings.Width = Unit.Percentage(100);
     settings.CallbackRouteValues = new { Controller = "Home", Action = "BatchEditingPartial" };
@@ -28,29 +29,260 @@
     settings.SettingsEditing.BatchEditSettings.StartEditAction = GridViewBatchStartEditAction.FocusedCellClick;
     //settings.SettingsEditing.BatchEditSettings.HighlightDeletedRows = BatchEditingOptions.HighlightDeletedRows;
     settings.SettingsEditing.BatchEditSettings.HighlightDeletedRows = true;
-
-    settings.CommandColumn.Visible = true;
-    settings.CommandColumn.ShowDeleteButton = true;
-    settings.CommandColumn.ShowNewButtonInHeader = true;
+    // Show the command column, and enable the "Edit" and "Create" buttons within the command column.
+    settings.CommandColumn.Visible = false; //was true
+    settings.CommandColumn.ShowDeleteButton = false; //was true
+    settings.CommandColumn.ShowNewButtonInHeader = false; //was true
     settings.CommandColumn.Width = Unit.Point(50);
 
+    settings.SettingsPager.PageSize = 30;
 
-    settings.Columns.Add("ContrGUID");
-    settings.Columns.Add("ProductGroupProduct");
-    settings.Columns.Add("Product");
-    settings.Columns.Add("Service1Quarter");
-    settings.Columns.Add("Consult1Quarter");
+    var contractstatus = Session["contractstatus"] as string;
+
+    if (contractstatus != "1")
+    {
+        settings.SettingsDataSecurity.AllowEdit = false;
+        settings.SettingsDataSecurity.AllowDelete = false;
+        settings.SettingsDataSecurity.AllowInsert = false;
+    }
+    else {
+        settings.SettingsDataSecurity.AllowEdit = true;
+        settings.SettingsDataSecurity.AllowDelete = true;
+        settings.SettingsDataSecurity.AllowInsert = true;
+    }
+
+
+    //settings.Columns.Add("ContrGuid");
+    //settings.Columns.Add("ProductGroupProduct");
+    settings.Columns.Add(c=> {
+        c.FieldName = "ProductGroupProduct";
+        c.Caption = "Продуктовая Группа";
+        c.EditFormSettings.Visible = DefaultBoolean.False;
+        c.GroupIndex = 0;
+        c.HeaderStyle.Font.Bold = true;
+
+    });
+    //settings.Columns.Add("Product");
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "Product";
+        c.Caption = "Продукт";
+        c.EditFormSettings.Visible = DefaultBoolean.False;
+        c.HeaderStyle.Font.Bold = true;
+    });
+    //settings.Columns.Add("Service1Quarter");
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "Service1Quarter";
+        c.Caption = "Сервис 1 квартал";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
+    //settings.Columns.Add("Consult1Quarter");
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "Consult1Quarter";
+        c.Caption = "Консалтинг 1 квартал";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
+
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "FirstQuartalTotal";
+        c.Caption = "Итого 1 квартал";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
     //settings.Columns.Add("Service2Quarter");
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "Service2Quarter";
+        c.Caption = "Сервис 2 квартал";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
     //settings.Columns.Add("Consult2Quarter");
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "Consult2Quarter";
+        c.Caption = "Консалтинг 2 квартал";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "SecondQuartalTotal";
+        c.Caption = "Итого 2 квартал";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
+
+
     //settings.Columns.Add("Service3Quarter");
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "Service3Quarter";
+        c.Caption = "Сервис 3 квартал";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
     //settings.Columns.Add("Consult3Quarter");
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "Consult3Quarter";
+        c.Caption = "Консалтинг 3 квартал";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "ThirdQuartalTotal";
+        c.Caption = "Итого 3 квартал";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
     //settings.Columns.Add("Service4Quarter");
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "Service4Quarter";
+        c.Caption = "Сервис 4 квартал";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
     //settings.Columns.Add("Consult4Quarter");
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "Consult4Quarter";
+        c.Caption = "Консалтинг 4 квартал";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "FourthQuartalTotal";
+        c.Caption = "Итого 4 квартал";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
     //settings.Columns.Add("NewServiceYear");
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "NewServiceYear";
+        c.Caption = "Сервис переходящий";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
     //settings.Columns.Add("NewConsultYear");
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "NewConsultYear";
+        c.Caption = "Консалтинг переходящий";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
     //settings.Columns.Add("NewProductTotalConsult");
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "NewProductTotalConsult";
+        c.Caption = "Итого консалтинг";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
     //settings.Columns.Add("NewProductTotalService");
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "NewProductTotalService";
+        c.Caption = "Итого сервис";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
     //settings.Columns.Add("NewYearTotal");
+    settings.Columns.Add(c =>
+    {
+        c.FieldName = "NewYearTotal";
+        c.Caption = "Итого переходящие";
+        c.PropertiesEdit.DisplayFormatString = "N";
+        c.HeaderStyle.Font.Bold = true;
+    });
+
+    settings.TotalSummary.Add(DevExpress.Data.SummaryItemType.Sum, "Service1Quarter").DisplayFormat = "c";
+    settings.TotalSummary.Add(DevExpress.Data.SummaryItemType.Sum, "Consult1Quarter").DisplayFormat = "c";
+    //settings.TotalSummary.Add(DevExpress.Data.SummaryItemType.Custom, "Total1Quarter").DisplayFormat = "c"; FirstQuartalTotal
+
+    settings.TotalSummary.Add(DevExpress.Data.SummaryItemType.Sum, "Service2Quarter").DisplayFormat = "c";
+    settings.TotalSummary.Add(DevExpress.Data.SummaryItemType.Sum, "Service3Quarter").DisplayFormat = "c";
+    settings.TotalSummary.Add(DevExpress.Data.SummaryItemType.Sum, "Service4Quarter").DisplayFormat = "c";
+
+
+    settings.TotalSummary.Add(DevExpress.Data.SummaryItemType.Sum, "Consult2Quarter").DisplayFormat = "c";
+    settings.TotalSummary.Add(DevExpress.Data.SummaryItemType.Sum, "Consult3Quarter").DisplayFormat = "c";
+    settings.TotalSummary.Add(DevExpress.Data.SummaryItemType.Sum, "Consult4Quarter").DisplayFormat = "c";
+
+    settings.TotalSummary.Add(DevExpress.Data.SummaryItemType.Sum, "NewServiceYear").DisplayFormat = "c";
+    settings.TotalSummary.Add(DevExpress.Data.SummaryItemType.Sum, "NewConsultYear").DisplayFormat = "c";
+    settings.TotalSummary.Add(DevExpress.Data.SummaryItemType.Sum, "NewProductTotalConsult").DisplayFormat = "c";
+    //tobe deleted
+    settings.TotalSummary.Add(DevExpress.Data.SummaryItemType.Sum, "NewProductTotalService").DisplayFormat = "c";
+    settings.TotalSummary.Add(DevExpress.Data.SummaryItemType.Sum, "NewYearTotal").DisplayFormat = "c";
+
+    //var service1QSum = settings.GroupSummary.Add(DevExpress.Data.SummaryItemType.Sum, "Service1Quarter");
+
+    //https://www.devexpress.com/Support/Center/Question/Details/Q312503/gridview-how-to-display-a-group-row-text-in-the-grouprowcontenttemplate
+    /* settings.SetGroupRowContentTemplateContent(c =>
+     {
+         //string s1QSum = service1QSum.GetGroupRowDisplayText()
+         ViewContext.Writer.Write("<div><p>Hello</p></div>");
+         //ViewContext.Writer.Write(c.GroupText);
+         ViewContext.Writer.Write(c.SummaryText);
+     });*/
+
+    //1. set groupsummery type to custom
+    //2. enable GridViewSettings.Settings.ShowFooter  --done
+    //3. set  CustomSummaryCalculate event handler via  GridViewSettings.CustomSummaryCalculate property
+    //settings.CustomSummaryCalculate = (sender, e) =>
+    //{
+    //    //ASPxSummaryItem summary = e.Item as ASPxSummaryItem;
+    //    //if (summary.FieldName != "Total1Quarter") return;
+    //    ASPxSummaryItem service1Total = (sender as ASPxGridView).TotalSummary["Service1Quarter"];
+    //    ASPxSummaryItem consult1Total = (sender as ASPxGridView).TotalSummary["Consult1Quarter"];
+    //    Decimal sTotal1 = Convert.ToDecimal(((ASPxGridView)sender).GetTotalSummaryValue(service1Total));
+    //    Decimal cTotal = Convert.ToDecimal(((ASPxGridView)sender).GetTotalSummaryValue(service1Total));
+    //    //e.TotalValue = sTotal1 + cTotal;
+    //    e.TotalValue = 354 + 451;
+
+
+    //};
+
+    settings.Settings.ShowFooter = true;
+    settings.Settings.ShowGroupFooter = GridViewGroupFooterMode.VisibleAlways;
+    //settings.GroupSummary.Add(DevExpress.Data.SummaryItemType.Sum, "Service1Quarter").ShowInGroupFooterColumn = "Service1Quarter";
+
+    //settings.GroupSummary.Add(DevExpress.Data.SummaryItemType.Sum, "Service1Quarter").DisplayFormat = "c";
+    /*  settings.GroupSummary.Add(DevExpress.Data.SummaryItemType.Sum, "Service1Quarter").DisplayFormat = "c";
+      settings.GroupSummary.Add(DevExpress.Data.SummaryItemType.Sum, "Consult1Quarter").DisplayFormat = "c";
+      settings.GroupSummary.Add(DevExpress.Data.SummaryItemType.Custom, "Total1Quarter").DisplayFormat = "c";*/
+
+    // settings.Settings.ShowGroupPanel = true;
+
+    /*
+                 var vc = settings.GroupSummary.Add(DevExpress.Data.SummaryItemType.Count, "Feature_Value");
+
+            settings.SetGroupRowContentTemplateContent(c =>
+                {
+                    string TheFeature = DataBinder.Eval(c.DataItem, "FeatureName").ToString();
+                    string ValCount = vc.GetGroupDisplayText().ToString(); // this needs to contain the count of Feature_Value records
+                    %>
+                    <%= Html.Label(TheFeature) + "&nbsp (" + Html.Label(ValCount) + ")" %>
+                    <%= Html.ActionLink("Edit", "EditFeature","Feature", new { FeatureID = DataBinder.Eval(c.DataItem, "FeatureID") })%>
+
+              <% });
+     
+     */
+
+
+
+
 
     //settings.Columns.Add("new_contract_plan_productId");
     //settings.Columns.Add("new_service_1_quarter");

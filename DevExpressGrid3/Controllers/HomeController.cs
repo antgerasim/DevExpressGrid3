@@ -1,92 +1,54 @@
-using DevExpress.Data.Helpers;
 using DevExpress.Web.Mvc;
-using DevExpressGrid3.Helpers;
 using DevExpressGrid3.Models;
+using DevExpressGrid3.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
-using System.Web;
 using System.Web.Mvc;
 
 namespace DevExpressGrid3.Controllers
 {
     public class HomeController : Controller
     {
-        public ActionResult Index()
-        {
-            ViewBag.Message = "Welcome to DevExpress Extensions for ASP.NET MVC!";
-
-            //ViewBag.BatchEditingOptions = new BatchEditingDemoOptions();//change latte for other settings from Url
-            return View(); //goes to straight to gridviewpartial
-        }
-
         RTCRM Db = new RTCRM();
         //https://documentation.devexpress.com/AspNet/14760/ASP-NET-MVC-Extensions/Grid-View/Concepts/Binding-to-Data/Binding-to-Large-Data-Database-Server-Mode
-
+        public ActionResult Index(string parenttableid, string contractstatus)
+        {
+            //http://localhost:50895/?parenttableid=3D317583-36B0-E811-80D3-DBE78F6B8753&contractstatus=2
+            //ViewBag.Message = "Welcome to DevExpress Extensions for ASP.NET MVC!";
+            var ptid = parenttableid == null ? "3D317583-36B0-E811-80D3-DBE78F6B8753" : parenttableid;
+            var cstatus = contractstatus == null ? "1" : contractstatus;
+            Session["parenttableid"] = ptid;
+            //Session["contractstatus"] = cstatus;
+            return View(new IndexViewModel(ptid));
+        }
 
         [ValidateInput(false)]
-        public ActionResult BatchEditingPartial()
+        public ActionResult BatchEditingPartial(string parenttableid)
         {
-            #region old 
-            //var query = from main in db.new_contract_plan_productBase
-            //            join a in db.new_d_product_catalogBase on main.new_link_product_id equals a.new_d_product_catalogId
-            //            join b in db.new_d_product_groupsBase on main.new_link_product_group_id equals b.new_d_product_groupsId
-            //            select new EditableContract
-            //            {
-            //                ContrGUID = main.new_contract_plan_productId,
-            //                ProductGroupProduct = a.new_name,
-            //                Product = b.new_name,
-            //                Service1Quarter = main.new_service_1_quarter,
-            //                Service2Quarter = main.new_service_2_quarter,
-            //                Service3Quarter = main.new_service_3_quarter,
-            //                Service4Quarter = main.new_service_4_quarter,
-            //                Consult1Quarter = main.new_consulting_1_quarter,
-            //                Consult2Quarter = main.new_consulting_2_quarter,
-            //                Consult3Quarter = main.new_consulting_3_quarter,
-            //                Consult4Quarter = main.new_consulting_4_quarter,
-            //                NewServiceYear = main.new_service_year,
-            //                NewConsultYear = main.new_year_sum,
-            //                NewProductTotalConsult = main.new_product_sum_consulting,
-            //                NewProductTotalService = main.new_product_sum_service,
-            //                NewYearTotal = main.new_year_sum
-            //            };
-            //var query = db.new_contract_plan_productBase
-            //    //.Include(table => table.new_d_product_catalogBase.new_name)
-            //    //.Include(table => table.new_d_product_groupsBase.new_name)
-            //    .Select(x => new EditableContract
-            //    {
-            //        ContrGUID = x.new_contract_plan_productId,
-            //        ProductGroupProduct = x.new_d_product_catalogBase.new_name,
-            //        Product = x.new_d_product_groupsBase.new_name,
-            //        //Service1Quarter = x.new_service_1_quarter.HasValue ? x.new_service_1_quarter.Value:
-            //        //Service1Quarter = x.new_service_1_quarter.GetValueOrDefault(0m)
-            //        Service1Quarter = x.new_service_1_quarter ?? Decimal.MinValue
+            //3D317583 - 36B0 - E811 - 80D3 - DBE78F6B8753 //my choice 359C8C83-74AC-E811-80D3-DBE78F6B8753
+            var model = GetEditableViewModelContracts(new Guid(parenttableid));
+            Session["contractstatus"] = model.FirstOrDefault().StatusCode;
 
-            //    });
-            #endregion
-            /* var model = db.new_contract_plan_productBase;*/
-            //var model = RtCrmDataProvider.GetEditableContracts();
-            var model = GetEditableContractsAsViewModel();
-            //var model = Db.new_contract_plan_productBase.ToList();
+            var urlTest = Request.RawUrl;
+            if (Request.IsAjaxRequest())
+            {
+                var ptid = Session["parenttableid"] as string;
+                var cstatus = Session["contractstatus"] as string;
+                var ajaxmodel = GetEditableViewModelContracts(new Guid(ptid));
 
+                return PartialView("BatchEditingPartial", ajaxmodel);
+            }
+
+            
             return PartialView("BatchEditingPartial", model);
-            //return PartialView("_GridViewPartial", model);
-
         }
 
         // Apply all changes made on the client side to a data source.
-
         [HttpPost, ValidateInput(false)]
-        //public ActionResult BatchEditingUpdateModel(MVCxGridViewBatchUpdateValues<new_contract_plan_productBase, Guid> updateValues)
         public ActionResult BatchEditingUpdateModel(MVCxGridViewBatchUpdateValues<EditableContract, Guid> updateValues)
-
         {
-            // var model = RtCrmDataProvider.GetEditableContracts();
-           //var model = GetEditableContractsAsDataContextModel();
-            var model = Db.new_contract_plan_productBase.ToList();
-
+            var dataContextModelContracts = GetDataContextModelContracts();
             // Insert all added values. 
             foreach (var contract in updateValues.Insert)
             {
@@ -94,10 +56,8 @@ namespace DevExpressGrid3.Controllers
                 {
                     try
                     {
-                        //model.Add(contract);
-                        //RtCrmDataProvider.Db.SaveChanges();
+                        InsertContract(contract, dataContextModelContracts);
                         Db.SaveChanges();
-
                     }
                     catch (Exception e)
                     {
@@ -112,18 +72,6 @@ namespace DevExpressGrid3.Controllers
                 {
                     try
                     {
-                        //var modelItem = model.FirstOrDefault(it => it.ContrGUID == contract.ContrGUID);
-                        //var modelItem = model.FirstOrDefault(it => it.new_contract_plan_productId == contract.new_contract_plan_productId);
-                        //if (modelItem != null)
-                        //{
-                        //    this.UpdateModel(modelItem); 
-                        //    //this.UpdateModel(contract);
-                        //    //RtCrmDataProvider.Db.SaveChanges();                            
-                        //    Db.SaveChanges();
-                        //}
-
-                        /*mapping from data to viewmodel*/
-
                         UpdateContract(contract);
                         Db.SaveChanges();
                     }
@@ -139,43 +87,61 @@ namespace DevExpressGrid3.Controllers
             {
                 try
                 {
-                    var item = model.FirstOrDefault(it => it.new_contract_plan_productId == ContrGUID);
-                    if (item != null) model.Remove(item);
-                    //RtCrmDataProvider.Db.SaveChanges();
+                    DeleteContract(ContrGUID, dataContextModelContracts);
                     Db.SaveChanges();
-
                 }
                 catch (Exception e)
                 {
                     updateValues.SetErrorText(ContrGUID, e.Message);
                 }
             }
-            //return PartialView("BatchEditingPartial", model.ToList());
-            return BatchEditingPartial();
+            var parenttableid = Session["parenttableid"] as string;
+            var contractstatus = Session["contractstatus"] as string;
+            return BatchEditingPartial(parenttableid, contractstatus);
         }
 
-        //private void UpdateContract(new_contract_plan_productBase contract, MVCxGridViewBatchUpdateValues<new_contract_plan_productBase, Guid> updateValues)
+        private void DeleteContract(Guid contrGuid, IList<new_contract_plan_productBase> dataContextModelContracts)
+        {
+            var dataContract = GetDataContextModelContract(contrGuid);
+            if (dataContract != null)
+            {
+                GetDataContextModelContracts().Remove(dataContract);
+            }
+        }
+
+        private void InsertContract(EditableContract editContract, IList<new_contract_plan_productBase> dataContextModelContracts)
+        {
+            var dataContextModelContract = new new_contract_plan_productBase();
+            //initialize childs for null reference errors
+            dataContextModelContract.new_d_product_groupsBase = new new_d_product_groupsBase();
+            dataContextModelContract.new_d_product_catalogBase = new new_d_product_catalogBase();
+
+            dataContextModelContract.new_contract_plan_productId = Guid.NewGuid(); //todo check if EF or db add guid automatically
+            dataContextModelContract.new_d_product_groupsBase.new_name = editContract.ProductGroupProduct;
+            dataContextModelContract.new_d_product_catalogBase.new_name = editContract.Product;
+            dataContextModelContract.new_service_1_quarter = editContract.Service1Quarter;
+            dataContextModelContract.new_consulting_1_quarter = editContract.Consult1Quarter;
+            //dataContextModelContracts.Add(dataContextModelContract);
+            Db.new_contract_plan_productBase.ToList().Add(dataContextModelContract);
+        }
+
         private void UpdateContract(EditableContract editContract)
         {
-
-            //NorthwindDataProvider.UpdateProduct(product);
-            //public static void UpdateProduct(EditableProduct product) in batch edititing demo 
-            //var editContract = Db.new_contract_plan_productBase.FirstOrDefault(it => it.new_contract_plan_productId == contract.new_contract_plan_productId);
-            var dataContract = Db.new_contract_plan_productBase.FirstOrDefault(it => it.new_contract_plan_productId == editContract.ContrGUID);
+            var dataContract = Db.new_contract_plan_productBase.FirstOrDefault(it => it.new_contract_plan_productId == editContract.ContrGuid);
 
             if (dataContract != null)
             {
-                dataContract.new_d_product_groupsBase.new_name = editContract.ProductGroupProduct;
-                dataContract.new_d_product_catalogBase.new_name = editContract.Product;
+                /*mapping from viewmodel to dataModel*/
+                dataContract.new_d_product_groupsBase.new_name = editContract.ProductGroupProduct ?? ""; //null check 
+                dataContract.new_d_product_catalogBase.new_name = editContract.Product ?? ""; // null check
                 dataContract.new_service_1_quarter = editContract.Service1Quarter;
                 dataContract.new_consulting_1_quarter = editContract.Consult1Quarter;
             }
-
-
         }
 
-        internal IList<EditableContract> GetEditableContractsAsViewModel()
+        private IList<EditableContract> GetEditableViewModelContracts(Guid filterId)
         {
+            #region HttpSessionExample
             //var contracts = (IList<EditableContract>)HttpContext.Current.Session["Contracts"];
 
             //if (contracts == null)
@@ -184,51 +150,7 @@ namespace DevExpressGrid3.Controllers
             //    contracts = query.ToList();
             //    HttpContext.Current.Session["Contracts"] = contracts;
             //}
-            IQueryable<EditableContract> query = ContractQueryAllAsViewModel();
-            var contracts = query.ToList();
-            return contracts;
-        }
-
-        internal IList<new_contract_plan_productBase> GetEditableContractsAsDataContextModel()
-        {
-
-            IQueryable<new_contract_plan_productBase> query = ContractQueryAllAsContextDataModel();
-            var contracts = query.ToList();
-            return contracts;
-        }
-
-        private IQueryable<new_contract_plan_productBase> ContractQueryAllAsContextDataModel()
-        {
-            var query = Db.new_contract_plan_productBase;
-            return query;
-        }
-
-        private IQueryable<EditableContract> ContractQueryAllAsViewModel()
-        {
-            var query = Db.new_contract_plan_productBase
-                //.Include(table => table.new_d_product_catalogBase.new_name)
-                //.Include(table => table.new_d_product_groupsBase.new_name)
-                .Select(x => new EditableContract //change here to actual dbentity, not view
-                {
-                    ContrGUID = x.new_contract_plan_productId,
-                    ProductGroupProduct = x.new_d_product_groupsBase.new_name,
-                    Product = x.new_d_product_catalogBase.new_name,
-                    Service1Quarter = x.new_service_1_quarter,
-                    Service2Quarter = x.new_service_2_quarter,
-                    Service3Quarter = x.new_service_3_quarter,
-                    Service4Quarter = x.new_service_4_quarter,
-                    Consult1Quarter = x.new_consulting_1_quarter,
-                    Consult2Quarter = x.new_consulting_2_quarter,
-                    Consult3Quarter = x.new_consulting_3_quarter,
-                    Consult4Quarter = x.new_consulting_4_quarter,
-                    NewServiceYear = x.new_service_year,
-                    NewConsultYear = x.new_year_sum,
-                    NewProductTotalConsult = x.new_product_sum_consulting,
-                    NewProductTotalService = x.new_product_sum_service,
-                    NewYearTotal = x.new_year_sum
-
-                });
-            return query;
+            #endregion
             #region oldjoins
             //return from main in Db.new_contract_plan_productBase
             //       join a in Db.new_d_product_catalogBase on main.new_link_product_id equals a.new_d_product_catalogId
@@ -253,138 +175,112 @@ namespace DevExpressGrid3.Controllers
             //           NewYearTotal = main.new_year_sum
             //       };
             #endregion
-
+            //IQueryable<EditableContract> query = Db.new_contract_plan_productBase.Where(x=> x.new_link_contract_plan_year_id == filterId)
+            IQueryable<EditableContract> query = Db.new_contract_plan_productBase
+                //.Where(x => x.new_link_contract_plan_year_id == filterId)
+                .Select(dataContextModelContract => new EditableContract
+                {
+                    ContrGuid = dataContextModelContract.new_contract_plan_productId,
+                    ProductGroupProduct = dataContextModelContract.new_d_product_groupsBase.new_name,
+                    Product = dataContextModelContract.new_d_product_catalogBase.new_name,
+                    Service1Quarter = dataContextModelContract.new_service_1_quarter,
+                    Service2Quarter = dataContextModelContract.new_service_2_quarter,
+                    Service3Quarter = dataContextModelContract.new_service_3_quarter,
+                    Service4Quarter = dataContextModelContract.new_service_4_quarter,
+                    Consult1Quarter = dataContextModelContract.new_consulting_1_quarter,
+                    Consult2Quarter = dataContextModelContract.new_consulting_2_quarter,
+                    Consult3Quarter = dataContextModelContract.new_consulting_3_quarter,
+                    Consult4Quarter = dataContextModelContract.new_consulting_4_quarter,
+                    NewServiceYear = dataContextModelContract.new_service_year,
+                    NewConsultYear = dataContextModelContract.new_year_sum,
+                    NewProductTotalConsult = dataContextModelContract.new_product_sum_consulting,
+                    NewProductTotalService = dataContextModelContract.new_product_sum_service,
+                    NewYearTotal = dataContextModelContract.new_year_sum,
+                    FirstQuartalTotal = dataContextModelContract.new_service_1_quarter + dataContextModelContract.new_consulting_1_quarter,
+                    SecondQuartalTotal = dataContextModelContract.new_service_2_quarter + dataContextModelContract.new_consulting_2_quarter,
+                    ThirdQuartalTotal = dataContextModelContract.new_service_3_quarter + dataContextModelContract.new_consulting_3_quarter,
+                    FourthQuartalTotal = dataContextModelContract.new_service_4_quarter + dataContextModelContract.new_consulting_4_quarter,
+                    StatusCode = dataContextModelContract.statuscode
+                });
+            var contracts = query.ToList();
+            return contracts;
         }
+
+        private IList<new_contract_plan_productBase> GetDataContextModelContracts()
+        {
+            return Db.new_contract_plan_productBase.ToList(); ;
+        }
+
+        private new_contract_plan_productBase GetDataContextModelContract(Guid contrGuid)
+        {
+            return Db.new_contract_plan_productBase.FirstOrDefault(contract => contract.new_contract_plan_productId == contrGuid);
+        }
+
+        //[HttpPost, ValidateInput(false)]
+        //public ActionResult GridViewPartialAddNew(DevExpressGrid3.Models.new_contract_plan_productBase item)
+        //{
+        //    var model = db.new_contract_plan_productBase;
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+        //            model.Add(item);
+        //            db.SaveChanges();
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            ViewData["EditError"] = e.Message;
+        //        }
+        //    }
+        //    else
+        //        ViewData["EditError"] = "Please, correct all errors.";
+        //    return PartialView("_GridViewPartial", model.ToList());
+        //}
+
+        //[HttpPost, ValidateInput(false)]
+        //public ActionResult GridViewPartialUpdate(DevExpressGrid3.Models.new_contract_plan_productBase item)
+        //{
+        //    var model = db.new_contract_plan_productBase;
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+        //            var modelItem = model.FirstOrDefault(it => it.new_contract_plan_productId == item.new_contract_plan_productId);
+        //            if (modelItem != null)
+        //            {
+        //                this.UpdateModel(modelItem);
+        //                db.SaveChanges();
+        //            }
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            ViewData["EditError"] = e.Message;
+        //        }
+        //    }
+        //    else
+        //        ViewData["EditError"] = "Please, correct all errors.";
+        //    return PartialView("_GridViewPartial", model.ToList());
+        //}
+
+        //[HttpPost, ValidateInput(false)]
+        //public ActionResult GridViewPartialDelete(System.Guid new_contract_plan_productId)
+        //{
+        //    var model = db.new_contract_plan_productBase;
+        //    if (new_contract_plan_productId != null)
+        //    {
+        //        try
+        //        {
+        //            var item = model.FirstOrDefault(it => it.new_contract_plan_productId == new_contract_plan_productId);
+        //            if (item != null)
+        //                model.Remove(item);
+        //            db.SaveChanges();
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            ViewData["EditError"] = e.Message;
+        //        }
+        //    }
+        //    return PartialView("_GridViewPartial", model.ToList());
+        //}
     }
-
-
-    //[ValidateInput(false)]
-    //public ActionResult BatchEditingPartial(BatchEditingDemoOptions options)
-    //{
-    //    ViewBag.BatchEditingOptions = options;
-    //    return PartialView("BatchEditingPartial", RtCrmDataProvider.GetEditableContracts());
-    //}
-
-    //[HttpPost, ValidateInput(false)]
-    //public ActionResult BatchEditingUpdateModel(MVCxGridViewBatchUpdateValues<EditableContract, int> updateValues, BatchEditingDemoOptions options)
-    //{
-    //    foreach (var product in updateValues.Insert)
-    //    {
-    //        if (updateValues.IsValid(product))
-    //            InsertContract(product, updateValues);
-    //    }
-    //    foreach (var product in updateValues.Update)
-    //    {
-    //        if (updateValues.IsValid(product))
-    //            UpdateContract(product, updateValues);
-    //    }
-    //    foreach (var productID in updateValues.DeleteKeys)
-    //    {
-    //        DeleteProduct(productID, updateValues);
-    //    }
-    //    return BatchEditingPartial(options);
-    //}
-
-    //private void DeleteProduct(int productID, MVCxGridViewBatchUpdateValues<EditableContract, int> updateValues)
-    //{
-    //    try
-    //    {
-    //        RtCrmDataProvider.DeleteProduct(productID);
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        updateValues.SetErrorText(productID, e.Message);
-    //    }
-    //}
-
-    //private void UpdateContract(EditableContract product, MVCxGridViewBatchUpdateValues<EditableContract, int> updateValues)
-    //{
-    //    try
-    //    {
-    //        RtCrmDataProvider.UpdateProduct(product);
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        updateValues.SetErrorText(product, e.Message);
-    //    }
-    //}
-
-    //protected void InsertContract(EditableContract contract, MVCxGridViewBatchUpdateValues<EditableContract, int> updateValues)
-    //{
-    //    try
-    //    {
-    //        RtCrmDataProvider.InsertContract(contract);
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        updateValues.SetErrorText(contract, e.Message);
-    //    }
-    //}
-
-    //[HttpPost, ValidateInput(false)]
-    //public ActionResult GridViewPartialAddNew(DevExpressGrid3.Models.new_contract_plan_productBase item)
-    //{
-    //    var model = db.new_contract_plan_productBase;
-    //    if (ModelState.IsValid)
-    //    {
-    //        try
-    //        {
-    //            model.Add(item);
-    //            db.SaveChanges();
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            ViewData["EditError"] = e.Message;
-    //        }
-    //    }
-    //    else
-    //        ViewData["EditError"] = "Please, correct all errors.";
-    //    return PartialView("_GridViewPartial", model.ToList());
-    //}
-
-    //[HttpPost, ValidateInput(false)]
-    //public ActionResult GridViewPartialUpdate(DevExpressGrid3.Models.new_contract_plan_productBase item)
-    //{
-    //    var model = db.new_contract_plan_productBase;
-    //    if (ModelState.IsValid)
-    //    {
-    //        try
-    //        {
-    //            var modelItem = model.FirstOrDefault(it => it.new_contract_plan_productId == item.new_contract_plan_productId);
-    //            if (modelItem != null)
-    //            {
-    //                this.UpdateModel(modelItem);
-    //                db.SaveChanges();
-    //            }
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            ViewData["EditError"] = e.Message;
-    //        }
-    //    }
-    //    else
-    //        ViewData["EditError"] = "Please, correct all errors.";
-    //    return PartialView("_GridViewPartial", model.ToList());
-    //}
-
-    //[HttpPost, ValidateInput(false)]
-    //public ActionResult GridViewPartialDelete(System.Guid new_contract_plan_productId)
-    //{
-    //    var model = db.new_contract_plan_productBase;
-    //    if (new_contract_plan_productId != null)
-    //    {
-    //        try
-    //        {
-    //            var item = model.FirstOrDefault(it => it.new_contract_plan_productId == new_contract_plan_productId);
-    //            if (item != null)
-    //                model.Remove(item);
-    //            db.SaveChanges();
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            ViewData["EditError"] = e.Message;
-    //        }
-    //    }
-    //    return PartialView("_GridViewPartial", model.ToList());
-    //}
 }

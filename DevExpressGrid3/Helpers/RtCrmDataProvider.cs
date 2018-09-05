@@ -60,7 +60,7 @@ namespace DevExpressGrid3.Helpers
         {
             var editContract = new EditableContract()
             {
-                ContrGUID = contract.ContrGUID,
+                ContrGuid = contract.ContrGuid,
                 ProductGroupProduct = contract.ProductGroupProduct,
                 Product = contract.Product,
                 Service1Quarter = contract.Service1Quarter,
@@ -82,13 +82,13 @@ namespace DevExpressGrid3.Helpers
 
         public static void UpdateProduct(EditableContract contract)
         {
-            EditableContract editProduct = GetEditableContract(contract.ContrGUID);
+            EditableContract editProduct = GetEditableContract(contract.ContrGuid);
         }
 
         public static EditableContract GetEditableContract(Guid contrGUID)
         {
 
-            return ContractQueryAll().Where(contract => contract.ContrGUID == contrGUID).FirstOrDefault();
+            return ContractQueryAll().Where(contract => contract.ContrGuid == contrGUID).FirstOrDefault();
         }
 
         public static void DeleteProduct(Guid contrGUID)
@@ -121,7 +121,7 @@ namespace DevExpressGrid3.Helpers
                    join b in Db.new_d_product_groupsBase on main.new_link_product_group_id equals b.new_d_product_groupsId
                    select new EditableContract
                    {
-                       ContrGUID = main.new_contract_plan_productId,
+                       ContrGuid = main.new_contract_plan_productId,
                        ProductGroupProduct = a.new_name,
                        Product = b.new_name,
                        Service1Quarter = main.new_service_1_quarter,

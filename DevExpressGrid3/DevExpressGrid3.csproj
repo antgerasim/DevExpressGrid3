@@ -173,6 +173,8 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="ViewModels\IndexViewModel.cs" />
+    <Compile Include="ViewModels\BatchEditingPartial.cs" />
     <Compile Include="ViewModels\EditableContract.cs" />
     <Compile Include="Controllers\EditingController.cs" />
     <Compile Include="Controllers\HomeController.cs" />

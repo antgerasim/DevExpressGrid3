@@ -1,6 +1,4 @@
-@{
-    ViewBag.Title = "Home Page";
-}
+@model DevExpressGrid3.ViewModels.IndexViewModel
 
 @*<script type="text/javascript">
     MVCxClientGlobalEvents.AddControlsInitializedEventHandler(AttachEditorValueChangedEvent);
@@ -20,8 +18,7 @@
     }
 </script>*@
 
-<h1>DOR's Rostelekom Datagrid</h1>
-<p>look only for DevExpress().GridView() not Html.DevExtreme().DataGrid()!</p>
-@Html.Action("BatchEditingPartial")
+
+@Html.Action("BatchEditingPartial", new { parenttableid = Model.Parenttableid, contractstatus = Model.Contractstatus})
 
 

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 public class EditableContract
 {
-    public Guid ContrGUID { get; set; }
+    public Guid ContrGuid { get; set; }
     public string Product { get; set; }
     public string ProductGroupProduct { get; set; }
     [Display(Name = "Что то по русский")]
@@ -20,7 +20,13 @@ public class EditableContract
     public decimal? NewConsultYear { get; set; }
     public decimal? NewProductTotalService { get; set; }
     public decimal? NewProductTotalConsult { get; set; }
+   
     public decimal? NewYearTotal { get; set; }
+    public decimal? FirstQuartalTotal { get; set; }
+    public decimal? SecondQuartalTotal { get; set; }
+    public decimal? ThirdQuartalTotal { get; set; }
+    public decimal? FourthQuartalTotal { get; set; }
+    public decimal? StatusCode { get; set; }
 
 
 }
