@@ -1,3 +1,4 @@
+using DevExpress.Data.Helpers;
 using DevExpress.Web.Mvc;
 using DevExpressGrid3.Helpers;
 using DevExpressGrid3.Models;
@@ -67,7 +68,8 @@ namespace DevExpressGrid3.Controllers
             #endregion
             /* var model = db.new_contract_plan_productBase;*/
             //var model = RtCrmDataProvider.GetEditableContracts();
-            var model = GetEditableContracts();
+            //var model = GetEditableContractsAsViewModel();
+            var model = Db.new_contract_plan_productBase.ToList();
 
             return PartialView("BatchEditingPartial", model);
             //return PartialView("_GridViewPartial", model);
@@ -77,10 +79,11 @@ namespace DevExpressGrid3.Controllers
         // Apply all changes made on the client side to a data source.
 
         [HttpPost, ValidateInput(false)]
-        public ActionResult BatchEditingUpdateModel(MVCxGridViewBatchUpdateValues<EditableContract, Guid> updateValues)
+        public ActionResult BatchEditingUpdateModel(MVCxGridViewBatchUpdateValues<new_contract_plan_productBase, Guid> updateValues)
         {
             // var model = RtCrmDataProvider.GetEditableContracts();
-             var model = GetEditableContracts();
+            //var model = GetEditableContractsAsDataContextModel();
+            var model = Db.new_contract_plan_productBase.ToList();
 
             // Insert all added values. 
             foreach (var contract in updateValues.Insert)
@@ -107,15 +110,17 @@ namespace DevExpressGrid3.Controllers
                 {
                     try
                     {
-                        var modelItem = model.FirstOrDefault(it => it.ContrGUID == contract.ContrGUID);
-                        if (modelItem != null)
-                        {
-                            this.UpdateModel(modelItem);
-                            //this.UpdateModel(contract);
-                            //RtCrmDataProvider.Db.SaveChanges();
-                            Db.SaveChanges();
-
-                        }
+                        //var modelItem = model.FirstOrDefault(it => it.ContrGUID == contract.ContrGUID);
+                        //var modelItem = model.FirstOrDefault(it => it.new_contract_plan_productId == contract.new_contract_plan_productId);
+                        //if (modelItem != null)
+                        //{
+                        //    this.UpdateModel(modelItem); 
+                        //    //this.UpdateModel(contract);
+                        //    //RtCrmDataProvider.Db.SaveChanges();                            
+                        //    Db.SaveChanges();
+                        //}
+                        UpdateContract(contract, updateValues);
+                        Db.SaveChanges();
                     }
                     catch (Exception e)
                     {
@@ -129,7 +134,7 @@ namespace DevExpressGrid3.Controllers
             {
                 try
                 {
-                    var item = model.FirstOrDefault(it => it.ContrGUID == ContrGUID);
+                    var item = model.FirstOrDefault(it => it.new_contract_plan_productId == ContrGUID);
                     if (item != null) model.Remove(item);
                     //RtCrmDataProvider.Db.SaveChanges();
                     Db.SaveChanges();
@@ -144,7 +149,26 @@ namespace DevExpressGrid3.Controllers
             return BatchEditingPartial();
         }
 
-        internal  IList<EditableContract> GetEditableContracts()
+        private void UpdateContract(new_contract_plan_productBase contract, MVCxGridViewBatchUpdateValues<new_contract_plan_productBase, Guid> updateValues)
+        {
+            try
+            {
+                //NorthwindDataProvider.UpdateProduct(product);
+                //public static void UpdateProduct(EditableProduct product) in batch edititing demo 
+                var editContract = Db.new_contract_plan_productBase.FirstOrDefault(it => it.new_contract_plan_productId == contract.new_contract_plan_productId);
+                if (editContract != null)
+                {
+                    editContract.new_service_1_quarter = contract.new_service_1_quarter;
+                    editContract.new_consulting_1_quarter = contract.new_consulting_1_quarter;
+                }
+            }
+            catch (Exception e)
+            {
+                updateValues.SetErrorText(contract, e.Message);
+            }
+        }
+
+        internal IList<EditableContract> GetEditableContractsAsViewModel()
         {
             //var contracts = (IList<EditableContract>)HttpContext.Current.Session["Contracts"];
 
@@ -154,17 +178,31 @@ namespace DevExpressGrid3.Controllers
             //    contracts = query.ToList();
             //    HttpContext.Current.Session["Contracts"] = contracts;
             //}
-            IQueryable<EditableContract> query = ContractQueryAll();
-          var  contracts = query.ToList();
+            IQueryable<EditableContract> query = ContractQueryAllAsViewModel();
+            var contracts = query.ToList();
             return contracts;
         }
 
-        private IQueryable<EditableContract> ContractQueryAll()
+        internal IList<new_contract_plan_productBase> GetEditableContractsAsDataContextModel()
+        {
+
+            IQueryable<new_contract_plan_productBase> query = ContractQueryAllAsContextDataModel();
+            var contracts = query.ToList();
+            return contracts;
+        }
+
+        private IQueryable<new_contract_plan_productBase> ContractQueryAllAsContextDataModel()
+        {
+            var query = Db.new_contract_plan_productBase;
+            return query;
+        }
+
+        private IQueryable<EditableContract> ContractQueryAllAsViewModel()
         {
             var query = Db.new_contract_plan_productBase
                 //.Include(table => table.new_d_product_catalogBase.new_name)
                 //.Include(table => table.new_d_product_groupsBase.new_name)
-                .Select(x => new EditableContract
+                .Select(x => new EditableContract //change here to actual dbentity, not view
                 {
                     ContrGUID = x.new_contract_plan_productId,
                     ProductGroupProduct = x.new_d_product_groupsBase.new_name,
@@ -184,7 +222,8 @@ namespace DevExpressGrid3.Controllers
                     NewYearTotal = x.new_year_sum
 
                 });
-
+            return query;
+            #region oldjoins
             //return from main in Db.new_contract_plan_productBase
             //       join a in Db.new_d_product_catalogBase on main.new_link_product_id equals a.new_d_product_catalogId
             //       join b in Db.new_d_product_groupsBase on main.new_link_product_group_id equals b.new_d_product_groupsId
@@ -207,6 +246,8 @@ namespace DevExpressGrid3.Controllers
             //           NewProductTotalService = main.new_product_sum_service,
             //           NewYearTotal = main.new_year_sum
             //       };
+            #endregion
+
         }
     }
 

@@ -1,5 +1,8 @@
-﻿@model IEnumerable<EditableContract>
-@using DevExpressGrid3.Helpers
+﻿@using DevExpressGrid3.Helpers
+@using DevExpressGrid3.Models
+@model IEnumerable<new_contract_plan_productBase>
+@*@model IEnumerable<EditableContract>*@
+
 
 @functions {
     BatchEditingDemoOptions BatchEditingOptions { get { return ViewBag.BatchEditingOptions; } }
@@ -15,7 +18,8 @@
 
 @Html.DevExpress().GridView(settings => {
     settings.Name = "GridView";
-    settings.KeyFieldName = "ContrGUID";
+    //settings.KeyFieldName = "ContrGUID";
+    settings.KeyFieldName = "new_contract_plan_productId";
     settings.Width = Unit.Percentage(100);
     settings.CallbackRouteValues = new { Controller = "Home", Action = "BatchEditingPartial" };
     // Specify the route value to the action method that will handle grid callbacks for batch data modification.
@@ -34,22 +38,28 @@
     settings.CommandColumn.ShowNewButtonInHeader = true;
     settings.CommandColumn.Width = Unit.Point(50);
 
-    settings.Columns.Add("ContrGUID");
-    settings.Columns.Add("ProductGroupProduct");
-    settings.Columns.Add("Product");
-    settings.Columns.Add("Service1Quarter");
-    settings.Columns.Add("Consult1Quarter");
-    settings.Columns.Add("Service2Quarter");
-    settings.Columns.Add("Consult2Quarter");
-    settings.Columns.Add("Service3Quarter");
-    settings.Columns.Add("Consult3Quarter");
-    settings.Columns.Add("Service4Quarter");
-    settings.Columns.Add("Consult4Quarter");
-    settings.Columns.Add("NewServiceYear");
-    settings.Columns.Add("NewConsultYear");
-    settings.Columns.Add("NewProductTotalConsult");
-    settings.Columns.Add("NewProductTotalService");
-    settings.Columns.Add("NewYearTotal");
+
+    //settings.Columns.Add("ContrGUID");
+    //settings.Columns.Add("ProductGroupProduct");
+    //settings.Columns.Add("Product");
+    //settings.Columns.Add("Service1Quarter");
+    //settings.Columns.Add("Consult1Quarter");
+    //settings.Columns.Add("Service2Quarter");
+    //settings.Columns.Add("Consult2Quarter");
+    //settings.Columns.Add("Service3Quarter");
+    //settings.Columns.Add("Consult3Quarter");
+    //settings.Columns.Add("Service4Quarter");
+    //settings.Columns.Add("Consult4Quarter");
+    //settings.Columns.Add("NewServiceYear");
+    //settings.Columns.Add("NewConsultYear");
+    //settings.Columns.Add("NewProductTotalConsult");
+    //settings.Columns.Add("NewProductTotalService");
+    //settings.Columns.Add("NewYearTotal");
+
+    settings.Columns.Add("new_contract_plan_productId");
+    settings.Columns.Add("new_service_1_quarter");
+    settings.Columns.Add("new_consulting_1_quarter");
+
     /*
         settings.Columns.Add("ContrGUID");
         settings.Columns.Add(c => {
