@@ -68,8 +68,8 @@ namespace DevExpressGrid3.Controllers
             #endregion
             /* var model = db.new_contract_plan_productBase;*/
             //var model = RtCrmDataProvider.GetEditableContracts();
-            //var model = GetEditableContractsAsViewModel();
-            var model = Db.new_contract_plan_productBase.ToList();
+            var model = GetEditableContractsAsViewModel();
+            //var model = Db.new_contract_plan_productBase.ToList();
 
             return PartialView("BatchEditingPartial", model);
             //return PartialView("_GridViewPartial", model);
@@ -79,10 +79,12 @@ namespace DevExpressGrid3.Controllers
         // Apply all changes made on the client side to a data source.
 
         [HttpPost, ValidateInput(false)]
-        public ActionResult BatchEditingUpdateModel(MVCxGridViewBatchUpdateValues<new_contract_plan_productBase, Guid> updateValues)
+        //public ActionResult BatchEditingUpdateModel(MVCxGridViewBatchUpdateValues<new_contract_plan_productBase, Guid> updateValues)
+        public ActionResult BatchEditingUpdateModel(MVCxGridViewBatchUpdateValues<EditableContract, Guid> updateValues)
+
         {
             // var model = RtCrmDataProvider.GetEditableContracts();
-            //var model = GetEditableContractsAsDataContextModel();
+           //var model = GetEditableContractsAsDataContextModel();
             var model = Db.new_contract_plan_productBase.ToList();
 
             // Insert all added values. 
@@ -92,7 +94,7 @@ namespace DevExpressGrid3.Controllers
                 {
                     try
                     {
-                        model.Add(contract);
+                        //model.Add(contract);
                         //RtCrmDataProvider.Db.SaveChanges();
                         Db.SaveChanges();
 
@@ -119,7 +121,10 @@ namespace DevExpressGrid3.Controllers
                         //    //RtCrmDataProvider.Db.SaveChanges();                            
                         //    Db.SaveChanges();
                         //}
-                        UpdateContract(contract, updateValues);
+
+                        /*mapping from data to viewmodel*/
+
+                        UpdateContract(contract);
                         Db.SaveChanges();
                     }
                     catch (Exception e)
@@ -149,23 +154,24 @@ namespace DevExpressGrid3.Controllers
             return BatchEditingPartial();
         }
 
-        private void UpdateContract(new_contract_plan_productBase contract, MVCxGridViewBatchUpdateValues<new_contract_plan_productBase, Guid> updateValues)
+        //private void UpdateContract(new_contract_plan_productBase contract, MVCxGridViewBatchUpdateValues<new_contract_plan_productBase, Guid> updateValues)
+        private void UpdateContract(EditableContract editContract)
         {
-            try
+
+            //NorthwindDataProvider.UpdateProduct(product);
+            //public static void UpdateProduct(EditableProduct product) in batch edititing demo 
+            //var editContract = Db.new_contract_plan_productBase.FirstOrDefault(it => it.new_contract_plan_productId == contract.new_contract_plan_productId);
+            var dataContract = Db.new_contract_plan_productBase.FirstOrDefault(it => it.new_contract_plan_productId == editContract.ContrGUID);
+
+            if (dataContract != null)
             {
-                //NorthwindDataProvider.UpdateProduct(product);
-                //public static void UpdateProduct(EditableProduct product) in batch edititing demo 
-                var editContract = Db.new_contract_plan_productBase.FirstOrDefault(it => it.new_contract_plan_productId == contract.new_contract_plan_productId);
-                if (editContract != null)
-                {
-                    editContract.new_service_1_quarter = contract.new_service_1_quarter;
-                    editContract.new_consulting_1_quarter = contract.new_consulting_1_quarter;
-                }
+                dataContract.new_d_product_groupsBase.new_name = editContract.ProductGroupProduct;
+                dataContract.new_d_product_catalogBase.new_name = editContract.Product;
+                dataContract.new_service_1_quarter = editContract.Service1Quarter;
+                dataContract.new_consulting_1_quarter = editContract.Consult1Quarter;
             }
-            catch (Exception e)
-            {
-                updateValues.SetErrorText(contract, e.Message);
-            }
+
+
         }
 
         internal IList<EditableContract> GetEditableContractsAsViewModel()
